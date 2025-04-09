@@ -52,6 +52,45 @@ def dividir_em_blocos(imagem, tamanho):
               for y in range(0, altura, tamanho) for x in range(0, largura, tamanho)]
     return blocos
 
+def contar_caixas(imagem_binaria, subdivisoes, modo='preto'):
+    """
+    Conta o número de blocos com pixels da estrutura (ramificação)
+    para cada subdivisão fornecida.
+
+    Parâmetros:
+        imagem_binaria: PIL.Image binarizada (branco/preto)
+        subdivisoes: lista de inteiros com quantidades de blocos por lado (ex: [2, 4, 8, 16])
+        modo: 'preto' para contar pixels escuros (estrutura), 'branco' para claros (fundo)
+
+    Retorna:
+        tam_caixa: lista com tamanhos das caixas (lado da imagem / subdivisão)
+        num_caixas: lista com o número de blocos contendo estrutura
+    """
+    largura, altura = imagem_binaria.size
+    matriz = np.array(imagem_binaria)
+
+    tam_caixa = []
+    num_caixas = []
+
+    for s in subdivisoes:
+        box_w = largura // s
+        box_h = altura // s
+        count = 0
+        for i in range(s):
+            for j in range(s):
+                bloco = matriz[j*box_h:(j+1)*box_h, i*box_w:(i+1)*box_w]
+                if modo == 'preto':
+                    if np.any(bloco < 128):
+                        count += 1
+                else:
+                    if np.any(bloco > 128):
+                        count += 1
+        tam_caixa.append(largura / s)
+        num_caixas.append(count)
+
+    return tam_caixa, num_caixas
+
+
 
 def calcular_dimensao_fractal(imagem, status, label):
     largura, altura = imagem.size
